@@ -6,7 +6,11 @@ import {
   Badge,
   Button,
   ButtonVariant,
+  MenuToggle,
   PageSection,
+  Select,
+  SelectList,
+  SelectOption,
   Tab,
   TabTitleText,
   ToolbarItem,
@@ -39,6 +43,7 @@ import { toAddClient } from "./routes/AddClient";
 import { toClient } from "./routes/Client";
 import { ClientsTab, toClients } from "./routes/Clients";
 import { toImportClient } from "./routes/ImportClient";
+import { useLoginProviders } from "../context/server-info/ServerInfoProvider";
 import { getProtocolName, isRealmClient } from "./utils";
 
 const ClientDetailLink = (client: ClientRepresentation) => {
@@ -144,6 +149,9 @@ export default function ClientsSection() {
   const [key, setKey] = useState(0);
   const refresh = () => setKey(new Date().getTime());
   const [selectedClient, setSelectedClient] = useState<ClientRepresentation>();
+  const [protocolFilter, setProtocolFilter] = useState("all");
+  const [protocolOpen, setProtocolOpen] = useState(false);
+  const loginProviders = useLoginProviders();
 
   const { hasAccess } = useAccess();
   const isManager = hasAccess("manage-clients");
@@ -156,6 +164,9 @@ export default function ClientsSection() {
     if (search) {
       params.clientId = search;
       params.search = true;
+    }
+    if (protocolFilter !== "all") {
+      params.protocol = protocolFilter;
     }
     return adminClient.clients.find({ ...params });
   };
@@ -214,7 +225,46 @@ export default function ClientsSection() {
               isPaginated
               ariaLabelKey="clientList"
               searchPlaceholderKey="searchForClient"
-              toolbarItem={<ToolbarItems />}
+              toolbarItem={
+                <>
+                  <ToolbarItems />
+                  <ToolbarItem>
+                    <Select
+                      isOpen={protocolOpen}
+                      selected={protocolFilter}
+                      onOpenChange={setProtocolOpen}
+                      onSelect={(_event, value) => {
+                        setProtocolFilter(String(value));
+                        setProtocolOpen(false);
+                        refresh();
+                      }}
+                      toggle={(toggleRef) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          onClick={() => setProtocolOpen(!protocolOpen)}
+                          isExpanded={protocolOpen}
+                          data-testid="client-protocol-filter"
+                        >
+                          {protocolFilter === "all"
+                            ? t("protocolTypes.all")
+                            : getProtocolName(t, protocolFilter)}
+                        </MenuToggle>
+                      )}
+                    >
+                      <SelectList>
+                        <SelectOption value="all">
+                          {t("protocolTypes.all")}
+                        </SelectOption>
+                        {loginProviders.map((provider) => (
+                          <SelectOption key={provider} value={provider}>
+                            {getProtocolName(t, provider)}
+                          </SelectOption>
+                        ))}
+                      </SelectList>
+                    </Select>
+                  </ToolbarItem>
+                </>
+              }
               actionResolver={(rowData: IRowData) => {
                 const client: ClientRepresentation = rowData.data;
                 const actions: Action<ClientRepresentation>[] = [

@@ -22,7 +22,7 @@ import useIsFeatureEnabled, { Feature } from "../../utils/useIsFeatureEnabled";
 import { useMemo } from "react";
 
 export type SearchType = "name" | "type" | "protocol";
-export const PROTOCOLS = ["all", "saml", "openid-connect"] as const;
+export const PROTOCOLS = ["all", "saml", "openid-connect", "cas"] as const;
 export type ProtocolType = (typeof PROTOCOLS)[number] | "oid4vc";
 
 export const nameFilter =

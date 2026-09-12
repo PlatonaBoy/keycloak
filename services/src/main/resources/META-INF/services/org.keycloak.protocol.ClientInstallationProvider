@@ -26,3 +26,4 @@ org.keycloak.protocol.saml.installation.KeycloakSamlSubsystemInstallation
 org.keycloak.protocol.docker.installation.DockerVariableOverrideInstallationProvider
 org.keycloak.protocol.docker.installation.DockerRegistryConfigFileInstallationProvider
 org.keycloak.protocol.docker.installation.DockerComposeYamlInstallationProvider
+org.keycloak.protocol.cas.installation.CASClientInstallation

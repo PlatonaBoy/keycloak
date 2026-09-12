@@ -9,8 +9,10 @@ import { AccessSettings } from "./add/AccessSettings";
 import { CapabilityConfig } from "./add/CapabilityConfig";
 import { LoginSettingsPanel } from "./add/LoginSettingsPanel";
 import { LogoutPanel } from "./add/LogoutPanel";
+import { CasSettings } from "./add/CasSettings";
 import { SamlConfig } from "./add/SamlConfig";
 import { SamlSignature } from "./add/SamlSignature";
+import { PROTOCOL_CAS } from "./constants";
 
 export type ClientSettingsProps = {
   client: ClientRepresentation;
@@ -55,6 +57,11 @@ export const ClientSettings = (props: ClientSettingsProps) => {
           title: t("signatureAndEncryption"),
           isHidden: protocol !== "saml" || client.bearerOnly,
           panel: <SamlSignature />,
+        },
+        {
+          title: t("casSettings"),
+          isHidden: protocol !== PROTOCOL_CAS || client.bearerOnly,
+          panel: <CasSettings />,
         },
         {
           title: t("capabilityConfig"),

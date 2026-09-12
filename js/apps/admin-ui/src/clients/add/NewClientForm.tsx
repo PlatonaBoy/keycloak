@@ -18,7 +18,9 @@ import { convertFormValuesToObject } from "../../util";
 import { FormFields } from "../ClientDetails";
 import { toClient } from "../routes/Client";
 import { toClients } from "../routes/Clients";
+import { PROTOCOL_CAS } from "../constants";
 import { CapabilityConfig } from "./CapabilityConfig";
+import { CasSettings } from "./CasSettings";
 import { GeneralSettings } from "./GeneralSettings";
 import { LoginSettings } from "./LoginSettings";
 import { useState } from "react";
@@ -123,9 +125,17 @@ export default function NewClientForm() {
               name={t("capabilityConfig")}
               id="capabilityConfig"
               key="capabilityConfig"
-              isHidden={protocol === "saml"}
+              isHidden={protocol === "saml" || protocol === PROTOCOL_CAS}
             >
               <CapabilityConfig protocol={protocol} />
+            </WizardStep>
+            <WizardStep
+              name={t("casSettings")}
+              id="casSettings"
+              key="casSettings"
+              isHidden={protocol !== PROTOCOL_CAS}
+            >
+              <CasSettings />
             </WizardStep>
             <WizardStep
               name={t("loginSettings")}

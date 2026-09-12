@@ -66,3 +66,6 @@ org.keycloak.protocol.oidc.mappers.ParameterizedScopeAudienceMapper
 org.keycloak.organization.protocol.mappers.saml.OrganizationMembershipMapper
 org.keycloak.organization.protocol.mappers.saml.OrganizationGroupMembershipMapper
 org.keycloak.protocol.saml.mappers.AuthnContextClassRefMapper
+org.keycloak.protocol.cas.mappers.UserPropertyCASMapper
+org.keycloak.protocol.cas.mappers.UserAttributeCASMapper
+org.keycloak.protocol.cas.mappers.FullNameCASMapper

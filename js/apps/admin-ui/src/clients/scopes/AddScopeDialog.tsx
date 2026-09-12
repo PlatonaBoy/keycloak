@@ -53,6 +53,7 @@ enum ProtocolType {
   SAML = "SAML",
   OpenIDConnect = "OpenID Connect",
   OID4VC = "OpenID4VC",
+  CAS = "CAS",
 }
 
 export const AddScopeDialog = ({
@@ -85,6 +86,8 @@ export const AddScopeDialog = ({
       return scopes.filter((item) => item.protocol === "saml");
     } else if (protocolType === ProtocolType.OID4VC) {
       return scopes.filter((item) => item.protocol === "oid4vc");
+    } else if (protocolType === ProtocolType.CAS) {
+      return scopes.filter((item) => item.protocol === "cas");
     }
     return scopes;
   }, [scopes, filterType, protocolType]);
@@ -116,6 +119,8 @@ export const AddScopeDialog = ({
       setProtocolType(ProtocolType.OpenIDConnect);
     } else if (protocolType === ProtocolType.OID4VC) {
       setProtocolType(ProtocolType.OID4VC);
+    } else if (protocolType === ProtocolType.CAS) {
+      setProtocolType(ProtocolType.CAS);
     } else if (protocolType === ProtocolType.All) {
       setProtocolType(ProtocolType.All);
     }
@@ -140,6 +145,12 @@ export const AddScopeDialog = ({
         </SelectOption>,
       );
     }
+
+    options.push(
+      <SelectOption key={5} value={ProtocolType.CAS}>
+        {t("protocolTypes.cas")}
+      </SelectOption>,
+    );
 
     options.push(
       <SelectOption key={4} value={ProtocolType.All}>

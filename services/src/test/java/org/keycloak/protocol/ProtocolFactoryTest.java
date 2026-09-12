@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.keycloak.protocol.cas.CASLoginProtocolFactory;
 import org.keycloak.protocol.oid4vc.OID4VCLoginProtocolFactory;
 import org.keycloak.protocol.oidc.OIDCLoginProtocolFactory;
 import org.keycloak.protocol.saml.SamlProtocolFactory;
@@ -61,5 +62,7 @@ public class ProtocolFactoryTest {
                             factories.get(OIDCLoginProtocolFactory.UI_ORDER - 10).getClass());
         Assert.assertEquals(OID4VCLoginProtocolFactory.class,
                             factories.get(OIDCLoginProtocolFactory.UI_ORDER - 20).getClass());
+        Assert.assertEquals(CASLoginProtocolFactory.class,
+                            factories.get(OIDCLoginProtocolFactory.UI_ORDER - 30).getClass());
     }
 }

@@ -124,9 +124,10 @@ public class ClientsResource {
                                                  @Parameter(description = "whether this is a search query or a getClientById query") @QueryParam("search") @DefaultValue("false") boolean search,
                                                  @QueryParam("q") String searchQuery,
                                                  @Parameter(description = "the first result") @QueryParam("first") Integer firstResult,
-                                                 @Parameter(description = "the max results to return") @QueryParam("max") Integer maxResults) {
+                                                 @Parameter(description = "the max results to return") @QueryParam("max") Integer maxResults,
+                                                 @Parameter(description = "filter by login protocol, for example openid-connect, saml, or cas") @QueryParam("protocol") String protocol) {
         return ModelToRepresentation.filterValidRepresentations(
-                getClientModels(clientId, viewableOnly, search, searchQuery, firstResult, maxResults), c -> {
+                getClientModels(clientId, viewableOnly, search, searchQuery, firstResult, maxResults, protocol), c -> {
                     ClientRepresentation representation = ModelToRepresentation.toRepresentation(c, session);
                     if (!auth.clients().canManage(c)) {
                         StripSecretsUtils.stripClient(representation);
@@ -142,7 +143,22 @@ public class ClientsResource {
             String searchQuery,
             Integer firstResult,
             Integer maxResults) {
+        return getClientModels(clientId, viewableOnly, search, searchQuery, firstResult, maxResults, null);
+    }
+
+    public Stream<ClientModel> getClientModels(String clientId,
+            boolean viewableOnly,
+            boolean search,
+            String searchQuery,
+            Integer firstResult,
+            Integer maxResults,
+            String protocol) {
         auth.clients().requireList();
+
+        boolean filterByProtocol = protocol != null && !protocol.isBlank();
+        // Protocol filtering happens in memory, so skip storage-level pagination and apply it after the filter.
+        Integer storageFirst = filterByProtocol ? null : firstResult;
+        Integer storageMax = filterByProtocol ? null : maxResults;
 
         boolean canView = AdminPermissionsSchema.SCHEMA.isAdminPermissionsEnabled(realm) || auth.clients().canView();
         Stream<ClientModel> clientModels = Stream.empty();
@@ -150,15 +166,15 @@ public class ClientsResource {
             if (searchQuery != null) {
                 Map<String, String> attributes = SearchQueryUtils.getFields(searchQuery);
                 clientModels = canView
-                        ? realm.searchClientByAttributes(attributes, firstResult, maxResults)
+                        ? realm.searchClientByAttributes(attributes, storageFirst, storageMax)
                         : realm.searchClientByAttributes(attributes, -1, -1);
             } else if (clientId == null || clientId.trim().equals("")) {
                 clientModels = canView
-                        ? realm.getClientsStream(firstResult, maxResults)
+                        ? realm.getClientsStream(storageFirst, storageMax)
                         : realm.getClientsStream();
             } else if (search) {
                 clientModels = canView
-                        ? realm.searchClientByClientIdStream(clientId, firstResult, maxResults)
+                        ? realm.searchClientByClientIdStream(clientId, storageFirst, storageMax)
                         : realm.searchClientByClientIdStream(clientId, -1, -1);
             } else {
                 ClientModel client = realm.getClientByClientId(clientId);
@@ -176,8 +192,11 @@ public class ClientsResource {
         }
 
         Stream<ClientModel> s = clientModels.filter(m -> canView || auth.clients().canView(m));
+        if (filterByProtocol) {
+            s = s.filter(client -> protocol.equals(client.getProtocol()));
+        }
 
-        if (!canView) {
+        if (!canView || filterByProtocol) {
             s = paginatedStream(s, firstResult, maxResults);
         }
 

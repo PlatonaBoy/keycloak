@@ -5,6 +5,7 @@ import { HelpItem, TextControl } from "@keycloak/keycloak-ui-shared";
 
 import { MultiLineInput } from "../../components/multi-line-input/MultiLineInput";
 import { convertAttributeNameToForm } from "../../util";
+import { PROTOCOL_CAS } from "../constants";
 import { FormFields } from "../ClientDetails";
 
 type LoginSettingsProps = {
@@ -19,6 +20,8 @@ export const LoginSettings = ({
 
   const standardFlowEnabled = watch("standardFlowEnabled");
   const implicitFlowEnabled = watch("implicitFlowEnabled");
+  const showServiceUrls =
+    standardFlowEnabled || implicitFlowEnabled || protocol === PROTOCOL_CAS;
 
   return (
     <>
@@ -34,23 +37,41 @@ export const LoginSettings = ({
         label={t("homeURL")}
         labelIcon={t("homeURLHelp")}
       />
-      {(standardFlowEnabled || implicitFlowEnabled) && (
+      {showServiceUrls && (
         <>
           <FormGroup
-            label={t("validRedirectUri")}
+            label={
+              protocol === PROTOCOL_CAS
+                ? t("casServiceUrls")
+                : t("validRedirectUri")
+            }
             fieldId="kc-redirect"
             labelIcon={
               <HelpItem
-                helpText={t("validRedirectURIsHelp")}
-                fieldLabelId="validRedirectUri"
+                helpText={
+                  protocol === PROTOCOL_CAS
+                    ? t("casServiceUrlsHelp")
+                    : t("validRedirectURIsHelp")
+                }
+                fieldLabelId={
+                  protocol === PROTOCOL_CAS
+                    ? "casServiceUrls"
+                    : "validRedirectUri"
+                }
               />
             }
           >
             <MultiLineInput
               id="kc-redirect"
               name="redirectUris"
-              aria-label={t("validRedirectUri")}
-              addButtonLabel="addRedirectUri"
+              aria-label={
+                protocol === PROTOCOL_CAS
+                  ? t("casServiceUrls")
+                  : t("validRedirectUri")
+              }
+              addButtonLabel={
+                protocol === PROTOCOL_CAS ? "addCasServiceUrl" : "addRedirectUri"
+              }
             />
           </FormGroup>
           <FormGroup
@@ -95,7 +116,7 @@ export const LoginSettings = ({
           />
         </>
       )}
-      {protocol !== "saml" && standardFlowEnabled && (
+      {protocol !== "saml" && protocol !== PROTOCOL_CAS && standardFlowEnabled && (
         <FormGroup
           label={t("webOrigins")}
           fieldId="kc-web-origins"

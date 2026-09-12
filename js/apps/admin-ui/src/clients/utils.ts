@@ -18,6 +18,8 @@ export const getProtocolName = (t: TFunction<"clients">, protocol: string) => {
       return t("protocolTypes.saml");
     case "oid4vc":
       return t("protocolTypes.oid4vc");
+    case "cas":
+      return t("protocolTypes.cas");
     default:
       return protocol;
   }
