@@ -208,12 +208,18 @@ export function UserDataTable() {
     },
   });
 
-  const setUsersEnabled = async (users: UserRepresentation[], enabled: boolean) => {
+  const setUsersEnabled = async (
+    users: UserRepresentation[],
+    enabled: boolean,
+  ) => {
     try {
       for (const user of users) {
         const current = await adminClient.users.findOne({ id: user.id! });
         if (current) {
-          await adminClient.users.update({ id: user.id! }, { ...current, enabled });
+          await adminClient.users.update(
+            { id: user.id! },
+            { ...current, enabled },
+          );
         }
       }
       setSelectedRows([]);

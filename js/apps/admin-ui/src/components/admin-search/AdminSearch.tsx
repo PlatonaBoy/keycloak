@@ -230,10 +230,9 @@ export const AdminSearch = () => {
     void navigate(to);
   };
 
-  const shortcut =
-    typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform)
-      ? "⌘K"
-      : "Ctrl+K";
+  const shortcut = /Mac|iPhone|iPad/i.test(navigator.userAgent)
+    ? "⌘K"
+    : "Ctrl+K";
 
   return (
     <>
@@ -261,13 +260,15 @@ export const AdminSearch = () => {
           onChange={(_event, value) => setQuery(value)}
           onClear={() => setQuery("")}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              const first = hits[0] ?? filteredPages[0];
-              if (first) {
-                event.preventDefault();
-                go(first.to);
-              }
+            if (event.key !== "Enter") {
+              return;
             }
+            const first = hits.at(0) ?? filteredPages.at(0);
+            if (first === undefined) {
+              return;
+            }
+            event.preventDefault();
+            go(first.to);
           }}
           data-testid="admin-search-input"
         />

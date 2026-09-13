@@ -198,7 +198,10 @@ export default function ClientsSection() {
   const toggleClientEnabled = async (client: ClientRepresentation) => {
     const enabled = !client.enabled;
     try {
-      await adminClient.clients.update({ id: client.id! }, { ...client, enabled });
+      await adminClient.clients.update(
+        { id: client.id! },
+        { ...client, enabled },
+      );
       addAlert(
         enabled ? t("clientEnabledSuccess") : t("clientDisabledSuccess"),
         AlertVariant.success,

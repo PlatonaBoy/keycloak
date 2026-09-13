@@ -1,16 +1,21 @@
-import { addTrailingSlash } from "../util";
-
 export type RealmEndpoint = {
   id: string;
   labelKey: string;
   url: string;
 };
 
+function realmBaseUrl(serverBaseUrl: string, realm: string) {
+  const base = serverBaseUrl.endsWith("/")
+    ? serverBaseUrl
+    : `${serverBaseUrl}/`;
+  return `${base}realms/${encodeURIComponent(realm)}`;
+}
+
 export function buildRealmEndpoints(
   serverBaseUrl: string,
   realm: string,
 ): RealmEndpoint[] {
-  const realmBase = `${addTrailingSlash(serverBaseUrl)}realms/${encodeURIComponent(realm)}`;
+  const realmBase = realmBaseUrl(serverBaseUrl, realm);
   return [
     {
       id: "issuer",

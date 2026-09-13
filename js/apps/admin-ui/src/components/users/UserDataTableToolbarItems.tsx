@@ -2,7 +2,6 @@ import type RealmRepresentation from "@keycloak/keycloak-admin-client/lib/defs/r
 import type { UserProfileConfig } from "@keycloak/keycloak-admin-client/lib/defs/userProfileMetadata";
 import {
   Button,
-  ButtonVariant,
   Dropdown,
   DropdownItem,
   DropdownList,

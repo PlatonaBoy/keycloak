@@ -51,7 +51,11 @@ type ShortcutCard = {
   visible: boolean;
 };
 
-export const RealmOverview = ({ showTitle = true }: { showTitle?: boolean }) => {
+export const RealmOverview = ({
+  showTitle = true,
+}: {
+  showTitle?: boolean;
+}) => {
   const { t } = useTranslation();
   const { adminClient } = useAdminClient();
   const { environment } = useEnvironment();

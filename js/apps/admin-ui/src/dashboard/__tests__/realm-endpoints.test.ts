@@ -30,8 +30,6 @@ describe("buildRealmEndpoints", () => {
       "my realm",
     );
 
-    expect(endpoints[0].url).toBe(
-      "https://auth.example.com/realms/my%20realm",
-    );
+    expect(endpoints[0].url).toBe("https://auth.example.com/realms/my%20realm");
   });
 });
