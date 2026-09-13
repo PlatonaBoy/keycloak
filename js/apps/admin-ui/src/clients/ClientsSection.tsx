@@ -195,6 +195,20 @@ export default function ClientsSection() {
     },
   });
 
+  const toggleClientEnabled = async (client: ClientRepresentation) => {
+    const enabled = !client.enabled;
+    try {
+      await adminClient.clients.update({ id: client.id! }, { ...client, enabled });
+      addAlert(
+        enabled ? t("clientEnabledSuccess") : t("clientDisabledSuccess"),
+        AlertVariant.success,
+      );
+      refresh();
+    } catch (error) {
+      addError(enabled ? "clientEnabledError" : "clientDisabledError", error);
+    }
+  };
+
   return (
     <>
       <ViewHeader
@@ -280,6 +294,12 @@ export default function ClientsSection() {
                   !isRealmClient(client) &&
                   (isManager || client.access?.configure)
                 ) {
+                  actions.push({
+                    title: client.enabled ? t("disable") : t("enable"),
+                    onClick() {
+                      void toggleClientEnabled(client);
+                    },
+                  });
                   actions.push({
                     title: t("delete"),
                     onClick() {

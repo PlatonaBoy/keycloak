@@ -5,7 +5,6 @@ import { HelpItem, useEnvironment } from "@keycloak/keycloak-ui-shared";
 import {
   ActionList,
   ActionListItem,
-  Brand,
   Button,
   Card,
   CardBody,
@@ -14,9 +13,6 @@ import {
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  EmptyState,
-  EmptyStateBody,
-  EmptyStateHeader,
   Grid,
   GridItem,
   Label,
@@ -45,33 +41,12 @@ import helpUrls from "../help-urls";
 import { resolveDisplayName } from "../util";
 import useLocaleSort, { mapByKey } from "../utils/useLocaleSort";
 import { ProviderInfo } from "./ProviderInfo";
+import { RealmOverview } from "./RealmOverview";
 import { DashboardTab, toDashboard } from "./routes/Dashboard";
 
 import "./dashboard.css";
 
-const EmptyDashboard = () => {
-  const { environment } = useEnvironment();
-
-  const { t } = useTranslation();
-  const { realm, realmRepresentation: realmInfo } = useRealm();
-  const brandImage = environment.logo ? environment.logo : "/icon.svg";
-  const realmDisplayInfo = resolveDisplayName(t, realmInfo.displayName, realm);
-
-  return (
-    <PageSection variant="light">
-      <EmptyState variant="lg">
-        <Brand
-          src={environment.resourceUrl + brandImage}
-          alt="Keycloak icon"
-          className="keycloak__dashboard_icon"
-        />
-        <EmptyStateHeader titleText={<>{t("welcome")}</>} headingLevel="h2" />
-        <EmptyStateHeader titleText={realmDisplayInfo} headingLevel="h1" />
-        <EmptyStateBody>{t("introduction")}</EmptyStateBody>
-      </EmptyState>
-    </PageSection>
-  );
-};
+const EmptyDashboard = () => <RealmOverview />;
 
 type FeatureItemProps = {
   feature: FeatureRepresentation;
@@ -191,7 +166,7 @@ const Dashboard = () => {
                     {t("viewDocumentation")}
                   </Button>
                 </div>
-                <ActionList className="pf-v5-u-mt-sm">
+                <ActionList className="pf-v5-u-mt-sm pf-v5-u-mb-lg">
                   <ActionListItem>
                     <Button
                       component="a"
@@ -224,6 +199,7 @@ const Dashboard = () => {
                   </ActionListItem>
                 </ActionList>
               </div>
+              <RealmOverview showTitle={false} />
             </PageSection>
           </Tab>
           <Tab

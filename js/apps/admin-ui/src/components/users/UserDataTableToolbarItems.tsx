@@ -41,6 +41,8 @@ type UserDataTableToolbarItemsProps = {
   clearAllFilters: () => void;
   createAttributeSearchChips: () => ReactNode;
   searchUserWithAttributes: () => void;
+  onEnableSelected: () => void;
+  onDisableSelected: () => void;
 };
 
 export function UserDataTableToolbarItems({
@@ -62,6 +64,8 @@ export function UserDataTableToolbarItems({
   clearAllFilters,
   createAttributeSearchChips,
   searchUserWithAttributes,
+  onEnableSelected,
+  onDisableSelected,
 }: UserDataTableToolbarItemsProps) {
   const { t } = useTranslation();
   const [kebabOpen, setKebabOpen] = useState(false);
@@ -157,18 +161,7 @@ export function UserDataTableToolbarItems({
     );
   };
 
-  const bruteForceProtectionToolbarItem = !realm.bruteForceProtected ? (
-    <ToolbarItem>
-      <Button
-        variant={ButtonVariant.link}
-        onClick={toggleDeleteDialog}
-        data-testid="delete-user-btn"
-        isDisabled={hasSelectedRows}
-      >
-        {t("deleteUser")}
-      </Button>
-    </ToolbarItem>
-  ) : (
+  const bruteForceProtectionToolbarItem = (
     <ToolbarItem>
       <Dropdown
         onOpenChange={(isOpen) => setKebabOpen(isOpen)}
@@ -178,6 +171,7 @@ export function UserDataTableToolbarItems({
             isExpanded={kebabOpen}
             variant="plain"
             onClick={() => setKebabOpen(!kebabOpen)}
+            data-testid="users-actions-kebab"
           >
             <EllipsisVIcon />
           </MenuToggle>
@@ -186,6 +180,28 @@ export function UserDataTableToolbarItems({
         shouldFocusToggleOnSelect
       >
         <DropdownList>
+          <DropdownItem
+            key="enableUsers"
+            component="button"
+            isDisabled={hasSelectedRows}
+            onClick={() => {
+              onEnableSelected();
+              setKebabOpen(false);
+            }}
+          >
+            {t("enableSelectedUsers")}
+          </DropdownItem>
+          <DropdownItem
+            key="disableUsers"
+            component="button"
+            isDisabled={hasSelectedRows}
+            onClick={() => {
+              onDisableSelected();
+              setKebabOpen(false);
+            }}
+          >
+            {t("disableSelectedUsers")}
+          </DropdownItem>
           <DropdownItem
             key="deleteUser"
             component="button"
@@ -198,16 +214,18 @@ export function UserDataTableToolbarItems({
             {t("deleteUser")}
           </DropdownItem>
 
-          <DropdownItem
-            key="unlock"
-            component="button"
-            onClick={() => {
-              toggleUnlockUsersDialog();
-              setKebabOpen(false);
-            }}
-          >
-            {t("unlockAllUsers")}
-          </DropdownItem>
+          {realm.bruteForceProtected && (
+            <DropdownItem
+              key="unlock"
+              component="button"
+              onClick={() => {
+                toggleUnlockUsersDialog();
+                setKebabOpen(false);
+              }}
+            >
+              {t("unlockAllUsers")}
+            </DropdownItem>
+          )}
         </DropdownList>
       </Dropdown>
     </ToolbarItem>

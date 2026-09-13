@@ -1,7 +1,6 @@
 import type IdentityProviderRepresentation from "@keycloak/keycloak-admin-client/lib/defs/identityProviderRepresentation";
 import type { IdentityProvidersQuery } from "@keycloak/keycloak-admin-client/lib/resources/identityProviders";
 import {
-  Action,
   IconMapper,
   KeycloakDataTable,
   ListEmptyState,
@@ -30,6 +29,7 @@ import {
   ToolbarItem,
 } from "@patternfly/react-core";
 import { groupBy, sortBy } from "lodash-es";
+import { IRowData } from "@patternfly/react-table";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -170,6 +170,30 @@ export default function IdentityProvidersSection() {
       </DropdownGroup>
     ));
 
+  const toggleProviderEnabled = async (
+    provider: IdentityProviderRepresentation,
+    enabled: boolean,
+  ) => {
+    try {
+      const current = await adminClient.identityProviders.findOne({
+        alias: provider.alias!,
+      });
+      if (current) {
+        await adminClient.identityProviders.update(
+          { alias: provider.alias! },
+          { ...current, enabled },
+        );
+        addAlert(
+          enabled ? t("idpEnabledSuccess") : t("idpDisabledSuccess"),
+          AlertVariant.success,
+        );
+        refresh();
+      }
+    } catch (error) {
+      addError(enabled ? "idpEnabledError" : "idpDisabledError", error);
+    }
+  };
+
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: "deleteProvider",
     messageKey: t("deleteConfirm", { provider: selectedProvider?.alias }),
@@ -295,15 +319,24 @@ export default function IdentityProvidersSection() {
                 </ToolbarItem>
               </>
             }
-            actions={[
-              {
-                title: t("delete"),
-                onRowClick: (provider) => {
-                  setSelectedProvider(provider);
-                  toggleDeleteDialog();
+            actionResolver={(rowData: IRowData) => {
+              const provider: IdentityProviderRepresentation = rowData.data;
+              return [
+                {
+                  title: provider.enabled ? t("disable") : t("enable"),
+                  onClick() {
+                    void toggleProviderEnabled(provider, !provider.enabled);
+                  },
                 },
-              } as Action<IdentityProviderRepresentation>,
-            ]}
+                {
+                  title: t("delete"),
+                  onClick() {
+                    setSelectedProvider(provider);
+                    toggleDeleteDialog();
+                  },
+                },
+              ];
+            }}
             columns={[
               {
                 name: "alias",

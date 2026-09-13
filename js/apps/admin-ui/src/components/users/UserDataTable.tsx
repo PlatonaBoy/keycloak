@@ -25,7 +25,6 @@ import {
 } from "@patternfly/react-core";
 import {
   ExclamationCircleIcon,
-  InfoCircleIcon,
   WarningTriangleIcon,
 } from "@patternfly/react-icons";
 import type { IRowData } from "@patternfly/react-table";
@@ -83,19 +82,13 @@ type StatusRowProps = {
 
 const StatusRow = ({ user }: StatusRowProps) => {
   const { t } = useTranslation();
+  if (!user.bruteForceStatus?.disabled) {
+    return null;
+  }
   return (
-    <>
-      {!user.enabled && (
-        <Label color="red" icon={<InfoCircleIcon />}>
-          {t("disabled")}
-        </Label>
-      )}
-      {user.bruteForceStatus?.disabled && (
-        <Label color="orange" icon={<WarningTriangleIcon />}>
-          {t("temporaryLocked")}
-        </Label>
-      )}
-    </>
+    <Label color="orange" icon={<WarningTriangleIcon />}>
+      {t("temporaryLocked")}
+    </Label>
   );
 };
 
@@ -110,6 +103,15 @@ const ValidatedEmail = (user: UserRepresentation) => {
       )}{" "}
       {emptyFormatter()(user.email) as JSX.Element}
     </>
+  );
+};
+
+const UserStatus = (user: UserRepresentation) => {
+  const { t } = useTranslation();
+  return user.enabled ? (
+    <Label color="green">{t("enabled")}</Label>
+  ) : (
+    <Label color="red">{t("disabled")}</Label>
   );
 };
 
@@ -205,6 +207,25 @@ export function UserDataTable() {
       }
     },
   });
+
+  const setUsersEnabled = async (users: UserRepresentation[], enabled: boolean) => {
+    try {
+      for (const user of users) {
+        const current = await adminClient.users.findOne({ id: user.id! });
+        if (current) {
+          await adminClient.users.update({ id: user.id! }, { ...current, enabled });
+        }
+      }
+      setSelectedRows([]);
+      refresh();
+      addAlert(
+        enabled ? t("usersEnabledSuccess") : t("usersDisabledSuccess"),
+        AlertVariant.success,
+      );
+    } catch (error) {
+      addError(enabled ? "usersEnabledError" : "usersDisabledError", error);
+    }
+  };
 
   const [toggleDeleteDialog, DeleteConfirm] = useConfirmDialog({
     titleKey: t("deleteConfirmUsers", {
@@ -320,6 +341,8 @@ export function UserDataTable() {
         clearAllFilters={clearAllFilters}
         createAttributeSearchChips={createAttributeSearchChips}
         searchUserWithAttributes={searchUserWithAttributes}
+        onEnableSelected={() => void setUsersEnabled(selectedRows, true)}
+        onDisableSelected={() => void setUsersEnabled(selectedRows, false)}
       />
     );
   };
@@ -382,15 +405,24 @@ export function UserDataTable() {
         }
         toolbarItem={toolbar()}
         subToolbar={subtoolbar()}
-        actionResolver={(rowData: IRowData) => [
-          {
-            title: t("delete"),
-            onClick: () => {
-              setSelectedRows([rowData.data]);
-              toggleDeleteDialog();
+        actionResolver={(rowData: IRowData) => {
+          const user: UserRepresentation = rowData.data;
+          return [
+            {
+              title: user.enabled ? t("disableUser") : t("enableUser"),
+              onClick: () => {
+                void setUsersEnabled([user], !user.enabled);
+              },
             },
-          },
-        ]}
+            {
+              title: t("delete"),
+              onClick: () => {
+                setSelectedRows([user]);
+                toggleDeleteDialog();
+              },
+            },
+          ];
+        }}
         isRowDisabled={(user: UserRepresentation) => !user.access?.manage}
         columns={[
           {
@@ -412,6 +444,11 @@ export function UserDataTable() {
             name: "firstName",
             displayKey: "firstName",
             cellFormatters: [emptyFormatter()],
+          },
+          {
+            name: "enabled",
+            displayKey: "status",
+            cellRenderer: UserStatus,
           },
         ]}
       />

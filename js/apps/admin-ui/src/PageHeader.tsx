@@ -8,6 +8,7 @@ import { HelpIcon } from "@patternfly/react-icons";
 import { useTranslation } from "react-i18next";
 import { Link, useHref } from "react-router-dom";
 import { PageHeaderClearCachesModal } from "./PageHeaderClearCachesModal";
+import { AdminSearch } from "./components/admin-search/AdminSearch";
 import { HelpHeader } from "./components/help-enabler/HelpHeader";
 import { useAccess } from "./context/access/Access";
 import { useRealm } from "./context/realm-context/RealmContext";
@@ -129,6 +130,9 @@ export const Header = () => {
       dropdownItems={userDropdownItems(isMasterRealm, isManager)}
       kebabDropdownItems={kebabDropdownItems(isMasterRealm, isManager)}
       toolbarItems={[
+        <ToolbarItem key="search" align={{ default: "alignRight" }}>
+          <AdminSearch />
+        </ToolbarItem>,
         <ToolbarItem
           key="help"
           align={{ default: "alignRight" }}
